@@ -1,6 +1,6 @@
 {
-  "name": "aozorarecorder",
-  "productName": "aozorarecorder personal",
+  "name": "aozora-recorder",
+  "productName": "aozora-recorder personal",
   "version": "0.0.0",
   "private": true,
   "description": "personal application for recording aozora books.",
