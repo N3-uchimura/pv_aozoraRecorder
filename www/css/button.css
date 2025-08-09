@@ -1,0 +1,122 @@
+/*
+/* button.css
+*/
+
+@charset "utf-8";
+
+/* buttons */
+.button-g {
+  position: relative;
+  width: auto;
+  min-height: 3rem;
+  margin: 0 0 0 10px;
+  padding: calc(.875rem-1px) calc(1.5rem-1px);
+  vertical-align: baseline;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  color: rgba(0, 0, 0, 0.85);
+  cursor: pointer;
+  font-family: system-ui, -apple-system, system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-decoration: none;
+  transition: all 250ms;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button-g:hover,
+.button-g:focus {
+  color: rgba(0, 0, 0, 0.65);
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
+}
+
+.button-g:hover {
+  transform: translateY(-1px);
+}
+
+.button-g:active {
+  color: rgba(0, 0, 0, 0.65);
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: rgba(0, 0, 0, 0.06) 0 2px 4px;
+  transform: translateY(0);
+}
+
+/* button size */
+.button-standard {
+  width: 100px;
+}
+
+.button-wide {
+  width: 80%;
+}
+
+/* red buttons */
+.button-8 {
+  background-color: #FFB2B2;
+}
+
+.button-8:active {
+  background-color: #FFA5A5;
+}
+
+/* lightpurple buttons */
+.button-6 {
+  background-color: #FFFFFF;
+}
+
+.button-6:active {
+  background-color: #F0F0F1;
+}
+
+/* lightorange buttons */
+.button-5 {
+  background-color: #FFCC99;
+}
+
+.button-5:active {
+  background-color: #FFB770;
+}
+
+/* lightblue buttons */
+.button-4 {
+  background-color: #CCE6FF;
+}
+
+.button-4:active {
+  background-color: #B3D9FF;
+}
+
+/* lightyellow buttons */
+.button-3 {
+  background-color: #FFFFB3;
+}
+
+.button-3:active {
+  background-color: #FFFF99;
+}
+
+/* lightgreen buttons */
+.button-2 {
+  background-color: #AFE1AF;
+}
+
+.button-2:active {
+  background-color: #9FE2BF;
+}
+
+/* gray buttons */
+.button-1 {
+  background-color: #898985;
+}
+
+.button-1:active {
+  background-color: #AFAFAA;
+}

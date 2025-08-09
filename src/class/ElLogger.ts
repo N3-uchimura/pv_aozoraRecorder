@@ -31,9 +31,9 @@ class ELLogger {
     logger.transports.console.format =
       '[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}] {text}';
     // set production
-    logger.transports.console.level = 'silly';
+    logger.transports.console.level = level;
     // set production
-    logger.transports.file.level = 'silly';
+    logger.transports.file.level = level;
     // filename now
     const curr: string = logger.transports.file.fileName;
     // file saving path

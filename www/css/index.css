@@ -11,222 +11,54 @@ body {
 }
 
 h1 {
-  font-size: 1.7rem;
-  color: #fff;
   margin: 10px 0;
   padding: 5px 0;
-  background-color: #134A63;
+  font-size: 1.7rem;
+  color: #fff;
+  background-color: #00053a;
 }
 
 h2 {
   margin: 10px 0 0 0;
-  color: #134A63;
+  color: #00053a;
   font-weight: bolder;
 }
 
 p {
+  padding: 0;
+  margin: 0;
   font-size: 0.9rem;
   font-weight: bold;
-  padding: 10px;
-  margin-top: 10px;
 }
 
 footer {
   font-size: 0.8rem;
 }
 
-::placeholder {
-  color: gray;
-  font-size: 1.7rem;
-  text-align: right;
-}
-
-.wrapper {
-  border: 5px solid #134A63;
-}
-
-.pubflex {
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pubwrapper {
-  height: 60px;
-  margin: 20px 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: none;
-  font-weight: bolder;
-}
-
-.pubwrapper div {
-  padding: 0 20px;
-}
-
-.pubwrapper input {
-  width: 400px;
-  height: 40px;
-}
-
-.urlbox {
-  width: 480px;
-  height: 40px;
-}
-
-.checkbox_area {
-  margin: 20px 0 20px;
-}
-
 .operation_area {
-  margin: 60px 0 60px;
+  margin: 20px 0;
 }
 
-.button-container {
-  margin: 10px 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.config_area {
+  margin: 50px 0 30px;
 }
 
-#resultTable {
-  width: 1280px;
-}
-
-.box-standard {
-  width: 200px;
-  height: 30px;
-  font-size: 1.7rem;
-  text-align: right;
-}
-
-/* blue buttons */
-.button-g {
-  width: auto;
-  margin-left: 10px;
-  align-items: center;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
-  box-sizing: border-box;
-  color: rgba(0, 0, 0, 0.85);
-  cursor: pointer;
-  display: inline-flex;
-  font-family: system-ui, -apple-system, system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  justify-content: center;
-  line-height: 1.25;
-  min-height: 3rem;
-  padding: calc(.875rem-1px) calc(1.5rem-1px);
-  position: relative;
-  text-decoration: none;
-  transition: all 250ms;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-  vertical-align: baseline;
-
-}
-
-.button-g:hover,
-.button-g:focus {
-  border-color: rgba(0, 0, 0, 0.15);
-  box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
-  color: rgba(0, 0, 0, 0.65);
-}
-
-.button-g:hover {
-  transform: translateY(-1px);
-}
-
-.button-g:active {
-  border-color: rgba(0, 0, 0, 0.15);
-  box-shadow: rgba(0, 0, 0, 0.06) 0 2px 4px;
-  color: rgba(0, 0, 0, 0.65);
-  transform: translateY(0);
-}
-
-.button-wide {
-  width: 250px;
-}
-
-.button-standard {
-  width: 120px;
-}
-
-.button-narrow {
-  width: 80px;
-}
-
-/* red buttons */
-.button-8 {
-  background-color: #FFB2B2;
-}
-
-.button-8:active {
-  background-color: #FFA5A5;
-}
-
-/* general buttons */
-.button-6 {
-  background-color: #FFFFFF;
-}
-
-.button-6:active {
-  background-color: #F0F0F1;
-}
-
-/* general buttons */
-.button-5 {
-  background-color: #FFCC99;
-}
-
-.button-5:active {
-  background-color: #FFB770;
-}
-
-/* general buttons */
-.button-4 {
-  background-color: #CCE6FF;
-}
-
-.button-4:active {
-  background-color: #B3D9FF;
-}
-
-/* general buttons */
-.button-3 {
-  background-color: #FFFFB3;
-}
-
-.button-3:active {
-  background-color: #FFFF99;
-}
-
-/* general buttons */
-.button-2 {
-  background-color: #AFE1AF;
-}
-
-.button-2:active {
-  background-color: #9FE2BF;
-}
-
-/* gray buttons */
-.button-1 {
-  background-color: #898985;
-}
-
-.button-1:active {
-  background-color: #AFAFAA;
+.exit_area {
+  margin: 30px 0;
 }
 
 #languagearea {
-  margin-right:10px;
+  margin-right: 10px;
 }
 
-#secret {
-  display:none;
+.arrow {
+  border: solid black;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+}
+
+.down {
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
 }

@@ -3,4 +3,5 @@
 /output/
 package-lock.json
 /release-builds/
-/.vscode
+/.vscode/
+/file/

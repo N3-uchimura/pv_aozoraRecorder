@@ -16,7 +16,7 @@ export namespace myConst {
 
 // default
 export namespace myNums {
-  export const WINDOW_WIDTH: number = 1200;
+  export const WINDOW_WIDTH: number = 600;
   export const WINDOW_HEIGHT: number = 1000;
   export const PORT: number = 5000;
 }
