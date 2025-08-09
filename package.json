@@ -1,5 +1,5 @@
 {
-  "name": "net.numthree.aozorarecorder",
+  "name": "aozorarecorder",
   "productName": "aozorarecorder personal",
   "version": "0.0.0",
   "private": true,
@@ -30,6 +30,5 @@
     "@types/node": "^20.19.9",
     "electron": "^29.1.1",
     "electron-builder": "^26.0.12"
-  },
-  "license": "ISC"
+  }
 }
