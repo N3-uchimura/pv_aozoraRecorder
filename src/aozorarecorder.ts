@@ -56,7 +56,7 @@ let isQuiting: boolean;
 let globalRootPath: string;
 
 // set rootpath
-if (app.isPackaged) {
+if (!myConst.DEVMODE) {
   globalRootPath = path.join(path.resolve(), 'resources');
 } else {
   globalRootPath = path.join(__dirname, '..');
