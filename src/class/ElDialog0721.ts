@@ -14,6 +14,7 @@ import { dialog } from 'electron'; // electron
 // ElectronDialog class
 class Dialog {
   static logger: any; // static logger
+
   // construnctor
   constructor(logger: any) {
     // logger setting

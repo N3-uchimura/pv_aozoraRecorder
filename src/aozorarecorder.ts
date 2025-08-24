@@ -13,10 +13,9 @@ import { myConst, myNums } from './consts/globalvariables';
 /// Modules
 import * as path from 'node:path'; // path
 import { rmSync, createWriteStream, existsSync } from 'node:fs'; // file system
-import { readFile, writeFile, readdir } from 'node:fs/promises'; // file system (Promise)
+import { readFile, writeFile, readdir, cp } from 'node:fs/promises'; // file system (Promise)
 import { BrowserWindow, app, ipcMain, Tray, Menu, nativeImage } from 'electron'; // electron
 import axios from 'axios'; // fot http communication
-import ffmpeg from 'fluent-ffmpeg'; // ffmpeg
 import iconv from 'iconv-lite'; // Text converter
 import { promisify } from 'util'; // promisify
 import * as stream from 'stream'; // steramer
@@ -24,6 +23,7 @@ import NodeCache from "node-cache"; // node-cache
 import ELLogger from './class/ElLogger'; // logger
 import Dialog from './class/ElDialog0721'; // dialog
 import MKDir from './class/ElMkdir0414'; // mdkir
+import Ffmpeg from './class/ElFfmpeg'; // mdkir
 
 // log level
 const LOG_LEVEL: string = myConst.LOG_LEVEL ?? 'all';
@@ -33,6 +33,8 @@ const logger: ELLogger = new ELLogger(myConst.COMPANY_NAME, myConst.APP_NAME, LO
 const dialogMaker: Dialog = new Dialog(logger);
 // mkdir instance
 const mkdirManager = new MKDir(logger);
+// ffmpeg instance
+const ffmpegManager = new Ffmpeg(logger);
 // cache instance
 const cacheMaker: NodeCache = new NodeCache();
 
@@ -445,6 +447,13 @@ ipcMain.on('merge', async (event: any, _) => {
     let statusmessage: string;
     // unit
     let tmpUnit: string;
+    // backup option
+    const backupOption: any = {
+      recursive: true,
+    }
+    // backup all
+    await cp(path.join(globalRootPath, 'file/partial'), path.join(globalRootPath, 'file/backup'), backupOption);
+    logger.debug('merge: backup to file/backup dir');
     // language
     const language = cacheMaker.get('language') ?? 'japanese';
     // subdir list
@@ -489,22 +498,30 @@ ipcMain.on('merge', async (event: any, _) => {
             return path.join(globalRootPath, 'file/partial', dir, fl);
           });
 
-          // output path
-          const outputPath: string = path.join(globalRootPath, 'file/output', `${dir}.wav`);
-          // ffmpeg
-          let mergedVideo: any = ffmpeg();
-
           // over 1000
           if (filePaths.length >= 1000) {
+            // split files
             const chunkedArr: any[][] = ((arr, size) => arr.flatMap((_, i, a) => i % size ? [] : [a.slice(i, i + size)]))(filePaths, 500);
             // operate each
-            for (const arr of chunkedArr) {
+            for await (const [index, arr] of Object.entries(chunkedArr)) {
+              // partial output path
+              const partialOutPath: string = path.join(globalRootPath, 'file/output', `${dir}-${index}.wav`);
+              // partial output path
+              const partialFinalPath: string = path.join(globalRootPath, 'file/output', `${dir}-${index}.m4a`);
               // merge wavs
-              await operateMerge(arr, mergedVideo, outputPath);
+              await ffmpegManager.mergeAudio(arr, partialOutPath, 10000, 10000);
+              // convert to m4a
+              await ffmpegManager.convertAudioToM4a(partialOutPath, partialFinalPath, 10000, 10000);
             }
           } else {
+            // output path
+            const outputPath: string = path.join(globalRootPath, 'file/output', `${dir}.wav`);
+            // partial output path
+            const finalPath: string = path.join(globalRootPath, 'file/output', `${dir}.m4a`);
             // merge wavs
-            await operateMerge(filePaths, mergedVideo, outputPath);
+            await ffmpegManager.mergeAudio(filePaths, outputPath, 10000, 10000);
+            // convert to m4a
+            await ffmpegManager.convertAudioToM4a(outputPath, finalPath, 10000, 10000);
           }
           resolve1();
 
@@ -730,42 +747,16 @@ const testRequest = async (): Promise<string> => {
   });
 }
 
-// merge
-const operateMerge = (arr: any[], mergedVideo: any, outputPath: string): Promise<void> => {
-  return new Promise(async (resolve1, reject1) => {
+// convert
+const convertToM4a = (mergedVideo: any, audioPath: string, outputPath: string): Promise<void> => {
+  return new Promise(async (resolve, reject) => {
     try {
-      // merge
-      await Promise.all(arr.map(async (path: string): Promise<void> => {
-        return new Promise(async (resolve2, reject2) => {
-          try {
-            // merged video
-            mergedVideo = mergedVideo.mergeAdd(path);
-            // complete
-            resolve2();
 
-          } catch (err1: unknown) {
-            // error
-            logger.error(err1);
-            reject2();
-          }
-        });
-      }));
-      logger.info('merge: merging files...');
-      // merge
-      mergedVideo.mergeToFile(outputPath, path.join(globalRootPath, 'file/backup'))
-        .on('error', (err2: unknown) => {
-          // error
-          logger.error(err2);
-          reject1();
-        })
-        .on('end', function () {
-          logger.debug(`merge: wav  merge finished.`);
-        });
-      resolve1();
+      resolve();
     } catch (error: unknown) {
       // error
       logger.error(error);
-      reject1();
+      reject();
     }
   });
 }
