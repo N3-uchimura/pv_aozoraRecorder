@@ -7,7 +7,7 @@
 /** const */
 // default
 export namespace myConst {
-  export const DEVMODE: boolean = true;
+  export const DEVMODE: boolean = false;
   export const COMPANY_NAME: string = "nthree";
   export const APP_NAME: string = "aozorastation";
   export const LOG_LEVEL: string = "info";

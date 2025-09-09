@@ -63,6 +63,8 @@ if (!myConst.DEVMODE) {
 } else {
   globalRootPath = path.join(__dirname, '..');
 }
+// file root path
+const fileRootPath: string = path.join(globalRootPath, 'file');
 
 // create main window
 const createWindow = (): void => {
@@ -93,7 +95,7 @@ const createWindow = (): void => {
     });
 
     // stay at tray
-    mainWindow.on('minimize', (event: any): void => {
+    mainWindow.on('will-resize', (event: any): void => {
       // avoid Wclick
       event.preventDefault();
       // hide window
@@ -162,10 +164,11 @@ app.on('ready', async () => {
     }
     // cache
     cacheMaker.set('language', language);
+
     // make dir
-    await mkdirManager.mkDir('file');
+    await mkdirManager.mkDir(fileRootPath);
     // make dir
-    await mkdirManager.mkDirAll(['file/source', 'file/output', 'file/backup', 'file/partial']);
+    await mkdirManager.mkDirAll([path.join(fileRootPath, 'source'), path.join(fileRootPath, 'output'), path.join(fileRootPath, 'backup'), path.join(fileRootPath, 'partial')]);
     // icons
     const icon: Electron.NativeImage = nativeImage.createFromPath(path.join(globalRootPath, 'assets', 'aozora.ico'));
     // tray
@@ -258,7 +261,7 @@ ipcMain.on('record', async (event: any, _) => {
       }
     }
     // subdir list
-    const allDirents: any = await readdir(path.join(globalRootPath, 'file/source'), { withFileTypes: true });
+    const allDirents: any = await readdir(path.join(fileRootPath, 'source'), { withFileTypes: true });
     // name list
     const dirNames: any[] = allDirents.filter((dirent: any) => dirent.isDirectory()).map(({ name }: any) => name);
     // if empty
@@ -275,7 +278,7 @@ ipcMain.on('record', async (event: any, _) => {
       return new Promise(async (resolve0, reject0) => {
         try {
           // delete path
-          const delFilePath: string = path.join(globalRootPath, 'file/partial', tmps);
+          const delFilePath: string = path.join(fileRootPath, 'partial', tmps);
           logger.silly(`deleting ${tmps}`);
           // delete file
           rmSync(delFilePath, { recursive: true });
@@ -292,7 +295,7 @@ ipcMain.on('record', async (event: any, _) => {
     logger.debug('ipc: delete file/partial files completed.');
 
     // file list
-    const files: string[] = await readdir(path.join(globalRootPath, 'file/source'));
+    const files: string[] = await readdir(path.join(fileRootPath, 'source'));
     // loop
     await Promise.all(files.map(async (fl: string): Promise<void> => {
       return new Promise(async (resolve1, reject1) => {
@@ -305,14 +308,14 @@ ipcMain.on('record', async (event: any, _) => {
           // ID
           const fileId: string = fileName.slice(0, 5);
           // save path
-          const outDirPath: string = path.join(globalRootPath, 'file/partial', fileId);
+          const outDirPath: string = path.join(fileRootPath, 'partial', fileId);
           // make dir
           if (!existsSync(outDirPath)) {
             await mkdirManager.mkDir(outDirPath);
             logger.silly(`finished making.. ${outDirPath}`);
           }
           // file path
-          const filePath: string = path.join(globalRootPath, 'file/source', fl);
+          const filePath: string = path.join(fileRootPath, 'source', fl);
           // file reading
           const txtdata: Buffer = await readFile(filePath);
           // decode
@@ -452,12 +455,12 @@ ipcMain.on('merge', async (event: any, _) => {
       recursive: true,
     }
     // backup all
-    await cp(path.join(globalRootPath, 'file/partial'), path.join(globalRootPath, 'file/backup'), backupOption);
+    await cp(path.join(fileRootPath, 'partial'), path.join(fileRootPath, 'backup'), backupOption);
     logger.debug('merge: backup to file/backup dir');
     // language
     const language = cacheMaker.get('language') ?? 'japanese';
     // subdir list
-    const allDirents: any = await readdir(path.join(globalRootPath, 'file/partial'), { withFileTypes: true });
+    const allDirents: any = await readdir(path.join(fileRootPath, 'partial'), { withFileTypes: true });
     const dirNames: any[] = allDirents.filter((dirent: any) => dirent.isDirectory()).map(({ name }: any) => name);
     logger.debug(`merge: filepaths are ${dirNames}`);
     // if empty
@@ -489,13 +492,15 @@ ipcMain.on('merge', async (event: any, _) => {
       return new Promise(async (resolve1, reject1) => {
         try {
           // target dir path
-          const targetDir: string = path.join(globalRootPath, 'file/partial', dir);
+          const targetDir: string = path.join(fileRootPath, 'partial', dir);
+          // output dir path
+          const outputDir: string = path.join(fileRootPath, 'output');
           // file list in subfolder
           const audioFiles: string[] = (await readdir(targetDir)).filter((ad: string) => path.parse(ad).ext == '.wav');
 
           // filepath list
           const filePaths: any[] = audioFiles.map((fl: string) => {
-            return path.join(globalRootPath, 'file/partial', dir, fl);
+            return path.join(fileRootPath, 'partial', dir, fl);
           });
 
           // over 1000
@@ -505,9 +510,9 @@ ipcMain.on('merge', async (event: any, _) => {
             // operate each
             for await (const [index, arr] of Object.entries(chunkedArr)) {
               // partial output path
-              const partialOutPath: string = path.join(globalRootPath, 'file/output', `${dir}-${index}.wav`);
+              const partialOutPath: string = path.join(outputDir, `${dir}-${index}.wav`);
               // partial output path
-              const partialFinalPath: string = path.join(globalRootPath, 'file/output', `${dir}-${index}.m4a`);
+              const partialFinalPath: string = path.join(outputDir, `${dir}-${index}.m4a`);
               // merge wavs
               await ffmpegManager.mergeAudio(arr, partialOutPath, 10000, 10000);
               // convert to m4a
@@ -515,9 +520,9 @@ ipcMain.on('merge', async (event: any, _) => {
             }
           } else {
             // output path
-            const outputPath: string = path.join(globalRootPath, 'file/output', `${dir}.wav`);
+            const outputPath: string = path.join(outputDir, `${dir}.wav`);
             // partial output path
-            const finalPath: string = path.join(globalRootPath, 'file/output', `${dir}.m4a`);
+            const finalPath: string = path.join(outputDir, `${dir}.m4a`);
             // merge wavs
             await ffmpegManager.mergeAudio(filePaths, outputPath, 10000, 10000);
             // convert to m4a

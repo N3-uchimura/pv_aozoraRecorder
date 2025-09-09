@@ -1,0 +1,25 @@
+directories:
+  output: dist
+  buildResources: assets
+appId: net.numthree.aozoraeditor
+productName: aozoraeditor
+files:
+  - filter:
+      - build/**/*
+      - package.json
+      - '!dist/**/*'
+      - '!src/**/*'
+      - '!.gitignore'
+      - '!.vscode'
+extraResources:
+  - filter:
+      - assets
+      - www/**/*
+squirrelWindows: {}
+win:
+  target: nsis
+  icon: assets/aozora.png
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+electronVersion: 38.0.0
