@@ -240,7 +240,7 @@ ipcMain.on("beforeready", async (event: any, _) => {
 });
 
 // record
-ipcMain.on('record', async (event: any, _) => {
+ipcMain.on('record', async (event: any, arg: any) => {
   try {
     logger.info('ipc: record started.');
     // status message
@@ -365,9 +365,9 @@ ipcMain.on('record', async (event: any, _) => {
                           logger.silly("record1: " + paddedIndex1);
                           logger.silly("record2: " + paddedIndex2);
                           // filename
-                          tmpFileName = `${paddedIndex1}${paddedIndex2}.wav`;
+                          tmpFileName = `${fileId}-${paddedIndex1}-${paddedIndex2}.wav`;
                           // synthesis request
-                          await synthesisRequest(tmpFileName, sb, outDirPath);
+                          await synthesisRequest(tmpFileName, sb, arg.model, arg.idx, outDirPath);
                           // add to filelist
                           tmpFileNameArray.push(tmpFileName);
                           // complete
@@ -376,7 +376,7 @@ ipcMain.on('record', async (event: any, _) => {
                         } catch (err1: unknown) {
                           // error
                           logger.error(err1);
-                          reject3();
+                          resolve3();
                         }
                       })
                     }));
@@ -385,14 +385,17 @@ ipcMain.on('record', async (event: any, _) => {
                     // filename
                     tmpFileName = `${fileId}-${paddedIndex1}.wav`;
                     // synthesis request
-                    await synthesisRequest(tmpFileName, st, outDirPath);
+                    await synthesisRequest(tmpFileName, st, arg.model, arg.idx, outDirPath);
                     // add to list
                     tmpFileNameArray.push(tmpFileName);
                   }
                   logger.debug(`record: ${tmpFileName} finished.`);
+                  // complete
+                  resolve2();
+                } else {
+                  logger.debug('record: no length.');
+                  resolve2();
                 }
-                // complete
-                resolve2();
 
               } catch (err2: unknown) {
                 // error
@@ -514,9 +517,9 @@ ipcMain.on('merge', async (event: any, _) => {
               // partial output path
               const partialFinalPath: string = path.join(outputDir, `${dir}-${index}.m4a`);
               // merge wavs
-              await ffmpegManager.mergeAudio(arr, partialOutPath, 10000, 10000);
+              await ffmpegManager.mergeAudio(arr, partialOutPath, 10000, 1024 * 1024 * 1024 * 5);
               // convert to m4a
-              await ffmpegManager.convertAudioToM4a(partialOutPath, partialFinalPath, 10000, 10000);
+              await ffmpegManager.convertAudioToM4a(partialOutPath, partialFinalPath, 10000, 100000);
             }
           } else {
             // output path
@@ -524,16 +527,20 @@ ipcMain.on('merge', async (event: any, _) => {
             // partial output path
             const finalPath: string = path.join(outputDir, `${dir}.m4a`);
             // merge wavs
-            await ffmpegManager.mergeAudio(filePaths, outputPath, 10000, 10000);
+            await ffmpegManager.mergeAudio(filePaths, outputPath, 10000, 1024 * 1024 * 1024 * 5);
             // convert to m4a
-            await ffmpegManager.convertAudioToM4a(outputPath, finalPath, 10000, 10000);
+            await ffmpegManager.convertAudioToM4a(outputPath, finalPath, 10000, 100000);
           }
           resolve1();
 
         } catch (error: unknown) {
           // error
           logger.error(error);
-          reject1();
+          // error
+          if (error instanceof Error) {
+            // status
+            event.sender.send('errorUpdate', error);
+          }
         }
       });
     }));
@@ -667,7 +674,7 @@ ipcMain.on('exit', async () => {
  Functions
 */
 // synthesis audio
-const synthesisRequest = async (filename: string, text: string, outDir: string): Promise<string> => {
+const synthesisRequest = async (filename: string, text: string, model: string, index: number, outDir: string): Promise<string> => {
   return new Promise(async (resolve, reject) => {
     try {
       logger.debug(`${filename} started.`);
@@ -677,9 +684,8 @@ const synthesisRequest = async (filename: string, text: string, outDir: string):
       const params: any = {
         text: text,
         encoding: 'utf-8',
-        model_id: 0,
-        speaker_id: 0,
-        peaker_name: 'bratology',
+        model_id: index,
+        //speaker_name: model,
         sdp_ratio: 0.2,
         noise: 0.6,
         noisew: 0.8,
@@ -748,20 +754,6 @@ const testRequest = async (): Promise<string> => {
         // error
         resolve('ng');
       }
-    }
-  });
-}
-
-// convert
-const convertToM4a = (mergedVideo: any, audioPath: string, outputPath: string): Promise<void> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-
-      resolve();
-    } catch (error: unknown) {
-      // error
-      logger.error(error);
-      reject();
     }
   });
 }

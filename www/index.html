@@ -13,6 +13,21 @@
   <h1 id="maintitle">Aozora Recorder</h1>
   <div class="operation_area">
     <h3 id="record">Record</h3>
+    <div id="select_box" class="cp_ipselect">
+      <select id="voicemodel" name="voicemodel">
+        <option value="aoyama">aoyama</option>
+        <option value="bratology">bratology</option>
+        <option value="chiyu-style">chiyu-style</option>
+        <option value="jvnv-F1-jp">jvnv-F1-jp</option>
+        <option value="jvnv-F2-jp">jvnv-F2-jp</option>
+        <option value="jvnv-M1-jp">jvnv-M1-jp</option>
+        <option value="jvnv-M2-jp">jvnv-M2-jp</option>
+        <option value="kubotahitoshi-style">kubotahitoshi-style</option>
+        <option value="merged_aoyama_chiyu">merged_aoyama_chiyu</option>
+        <option value="sango-style">sango-style</option>
+        <option value="zunda-style">zunda-style</option>
+      </select>
+    </div>
     <button id="record_button" class="button-g button-wide" value="record" onclick="gotoRecord();">Record</button>
   </div>
   <p><i class="arrow down"></i></p>
@@ -29,6 +44,7 @@
     <h3 id="statushead">Status</h3>
     <div id="status"></div>
     <div id="targetpage"></div>
+    <div id="error"></div>
   </div>
   <div class="exit_area">
     <button id="exit_button" class="button-g button-1 button-wide" value="exit" onclick="exitApp();">Exit</button>
@@ -60,11 +76,13 @@
     const mergeDom = document.getElementById('merge');
     const mergeButtonDom = document.getElementById('merge_button');
     const statusDom = document.getElementById('status');
+    const errorDom = document.getElementById('error');
     const statusHeadDom = document.getElementById('statushead');
     const pageDom = document.getElementById('targetpage');
     const configDom = document.getElementById('config');
     const configButtonDom = document.getElementById('config_button');
     const exitButtonDom = document.getElementById('exit_button');
+    const selectVoiceDom = document.getElementById("voicemodel");
 
     /// ipc
     // before ready
@@ -92,12 +110,34 @@
       }
     });
 
+    // update error
+    window.api.on('errorUpdate', arg => {
+      try {
+        console.log(arg);
+        // error 
+        errorDom.innerHTML = arg;
+
+      } catch (e) {
+        // error
+        console.log(e);
+      }
+    });
+
     // start recording
     const gotoRecord = () => {
       try {
         console.log('recording');
+        // voice index
+        const selectedVoiceIdx = selectVoiceDom.selectedIndex;
+        // voice selected
+        const tmpVoiceModel = selectVoiceDom.value;
+        // send obj
+        const sendObj = {
+          idx: selectedVoiceIdx,
+          model: tmpVoiceModel,
+        }
         // record
-        window.api.send('record');
+        window.api.send('record', sendObj);
 
       } catch (e) {
         // error

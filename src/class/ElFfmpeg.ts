@@ -9,6 +9,7 @@
 'use strict';
 
 // define modules
+import { statSync } from 'node:fs'; // file system
 import { execFile } from "child_process";
 import { promisify } from "util";
 
@@ -35,16 +36,32 @@ class ElFfmpeg {
     return new Promise(async (resolve, reject) => {
       try {
         // merge commands
+        let finalFiles: string[] = [];
         let fileCommands: string[] = [];
         let outCommands: string = '';
-        // file length
-        const fileLength: number = filePaths.length;
 
         // loop for files
-        for (let i = 0; i < filePaths.length; i++) {
-          fileCommands.push("-i");
-          fileCommands.push(filePaths[i]);
-          outCommands += `[${i}:a]`;
+        filePaths.forEach((file: any) => {
+          // file info
+          const fileInfo: any = statSync(file);
+          if (fileInfo.size > 0) {
+            finalFiles.push(file);
+          }
+        });
+        console.log(finalFiles);
+        // file length
+        const fileLength: number = finalFiles.length;
+
+        // loop for files
+        for (let i = 0; i < fileLength; i++) {
+          // file info
+          const fileInfo: any = statSync(finalFiles[i]);
+          // filesize is over 0
+          if (fileInfo.size > 0) {
+            fileCommands.push("-i");
+            fileCommands.push(finalFiles[i]);
+            outCommands += `[${i}:a]`;
+          }
         }
         outCommands += `concat=n=${fileLength}:v=0:a=1`;
 
