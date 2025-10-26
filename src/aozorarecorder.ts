@@ -22,7 +22,7 @@ import * as stream from 'stream'; // steramer
 import NodeCache from "node-cache"; // node-cache
 import ELLogger from './class/ElLogger'; // logger
 import Dialog from './class/ElDialog0721'; // dialog
-import MKDir from './class/ElMkdir0414'; // mdkir
+import FileManage from './class/ELFileManage1025'; // file operation
 import Ffmpeg from './class/ElFfmpeg'; // mdkir
 
 // log level
@@ -31,8 +31,8 @@ const LOG_LEVEL: string = myConst.LOG_LEVEL ?? 'all';
 const logger: ELLogger = new ELLogger(myConst.COMPANY_NAME, myConst.APP_NAME, LOG_LEVEL);
 // dialog instance
 const dialogMaker: Dialog = new Dialog(logger);
-// mkdir instance
-const mkdirManager = new MKDir(logger);
+// filemanage instance
+const fileManager = new FileManage(logger);
 // ffmpeg instance
 const ffmpegManager = new Ffmpeg(logger);
 // cache instance
@@ -166,9 +166,9 @@ app.on('ready', async () => {
     cacheMaker.set('language', language);
 
     // make dir
-    await mkdirManager.mkDir(fileRootPath);
+    await fileManager.mkDir(fileRootPath);
     // make dir
-    await mkdirManager.mkDirAll([path.join(fileRootPath, 'source'), path.join(fileRootPath, 'output'), path.join(fileRootPath, 'backup'), path.join(fileRootPath, 'partial')]);
+    await fileManager.mkDirAll([path.join(fileRootPath, 'source'), path.join(fileRootPath, 'output'), path.join(fileRootPath, 'backup'), path.join(fileRootPath, 'partial')]);
     // icons
     const icon: Electron.NativeImage = nativeImage.createFromPath(path.join(globalRootPath, 'assets', 'aozora.ico'));
     // tray
@@ -262,8 +262,8 @@ ipcMain.on('record', async (event: any, arg: any) => {
     }
     // subdir list
     const allDirents: any = await readdir(path.join(fileRootPath, 'source'), { withFileTypes: true });
-    // name list
-    const dirNames: any[] = allDirents.filter((dirent: any) => dirent.isDirectory()).map(({ name }: any) => name);
+    // remove all files
+    await fileManager.rmDir(path.join(fileRootPath, 'partial'));
     // if empty
     if (allDirents.length == 0) {
       // japanese
@@ -273,24 +273,6 @@ ipcMain.on('record', async (event: any, arg: any) => {
         throw new Error('file/source directory is empty');
       }
     }
-    // loop
-    await Promise.all(dirNames.map(async (tmps: string): Promise<void> => {
-      return new Promise(async (resolve0, reject0) => {
-        try {
-          // delete path
-          const delFilePath: string = path.join(fileRootPath, 'partial', tmps);
-          logger.silly(`deleting ${tmps}`);
-          // delete file
-          rmSync(delFilePath, { recursive: true });
-          resolve0();
-
-        } catch (err: unknown) {
-          // error
-          logger.error(err);
-          reject0();
-        }
-      });
-    }));
     // complete
     logger.debug('ipc: delete file/partial files completed.');
 
@@ -311,7 +293,7 @@ ipcMain.on('record', async (event: any, arg: any) => {
           const outDirPath: string = path.join(fileRootPath, 'partial', fileId);
           // make dir
           if (!existsSync(outDirPath)) {
-            await mkdirManager.mkDir(outDirPath);
+            await fileManager.mkDir(outDirPath);
             logger.silly(`finished making.. ${outDirPath}`);
           }
           // file path
@@ -367,7 +349,7 @@ ipcMain.on('record', async (event: any, arg: any) => {
                           // filename
                           tmpFileName = `${fileId}-${paddedIndex1}-${paddedIndex2}.wav`;
                           // synthesis request
-                          await synthesisRequest(tmpFileName, sb, arg.model, arg.idx, outDirPath);
+                          await synthesisRequest(tmpFileName, sb, arg, outDirPath);
                           // add to filelist
                           tmpFileNameArray.push(tmpFileName);
                           // complete
@@ -385,7 +367,7 @@ ipcMain.on('record', async (event: any, arg: any) => {
                     // filename
                     tmpFileName = `${fileId}-${paddedIndex1}.wav`;
                     // synthesis request
-                    await synthesisRequest(tmpFileName, st, arg.model, arg.idx, outDirPath);
+                    await synthesisRequest(tmpFileName, st, arg, outDirPath);
                     // add to list
                     tmpFileNameArray.push(tmpFileName);
                   }
@@ -561,8 +543,39 @@ ipcMain.on('merge', async (event: any, _) => {
     });
     // finish message
     dialogMaker.showmessage('info', finishedMessage);
-    logger.info('ipc: operation finished.')
+    logger.info('ipc: operation finished.');
 
+  } catch (e: unknown) {
+    logger.error(e);
+    // error
+    if (e instanceof Error) {
+      // error message
+      dialogMaker.showmessage('error', e.message);
+    }
+  }
+});
+
+// delete
+ipcMain.on('delete', async (event: any, _) => {
+  try {
+    logger.info('app: delete app');
+    // language
+    const language = cacheMaker.get('language') ?? 'japanese';
+    // remove all files
+    await fileManager.rmDir(path.join(fileRootPath, 'partial'));
+    // status message
+    let finishedMessage: string = '';
+    // switch on language
+    if (language == 'japanese') {
+      // set finish message
+      finishedMessage = '完了しました';
+    } else {
+      // set finish message
+      finishedMessage = 'Finished.';
+    }
+    // finish message
+    dialogMaker.showmessage('info', finishedMessage);
+    logger.info('ipc: operation finished.');
   } catch (e: unknown) {
     logger.error(e);
     // error
@@ -674,7 +687,7 @@ ipcMain.on('exit', async () => {
  Functions
 */
 // synthesis audio
-const synthesisRequest = async (filename: string, text: string, model: string, index: number, outDir: string): Promise<string> => {
+const synthesisRequest = async (filename: string, text: string, index: number, outDir: string): Promise<string> => {
   return new Promise(async (resolve, reject) => {
     try {
       logger.debug(`${filename} started.`);

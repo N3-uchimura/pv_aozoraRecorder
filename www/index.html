@@ -15,17 +15,8 @@
     <h3 id="record">Record</h3>
     <div id="select_box" class="cp_ipselect">
       <select id="voicemodel" name="voicemodel">
-        <option value="aoyama">aoyama</option>
-        <option value="bratology">bratology</option>
-        <option value="chiyu-style">chiyu-style</option>
-        <option value="jvnv-F1-jp">jvnv-F1-jp</option>
-        <option value="jvnv-F2-jp">jvnv-F2-jp</option>
-        <option value="jvnv-M1-jp">jvnv-M1-jp</option>
-        <option value="jvnv-M2-jp">jvnv-M2-jp</option>
-        <option value="kubotahitoshi-style">kubotahitoshi-style</option>
-        <option value="merged_aoyama_chiyu">merged_aoyama_chiyu</option>
-        <option value="sango-style">sango-style</option>
-        <option value="zunda-style">zunda-style</option>
+        <option value="1">bratology</option>
+        <option value="8">merged_aoyama_chiyu</option>
       </select>
     </div>
     <button id="record_button" class="button-g button-wide" value="record" onclick="gotoRecord();">Record</button>
@@ -34,6 +25,10 @@
   <div class="operation_area">
     <h3 id="merge">Merge</h3>
     <button id="merge_button" class="button-g button-wide" value="merge" onclick="gotoMerge();">Merge</button>
+  </div>
+  <div class="operation_area">
+    <h3 id="delete">Delete</h3>
+    <button id="delete_button" class="button-g button-wide" value="delete" onclick="gotoDelete();">Delete</button>
   </div>
   <div class="config_area">
     <h3 id="config">Config</h3>
@@ -59,6 +54,7 @@
     const APPNAME_STR_JA = '青空レコーダ';
     const RECORD_STR_JA = '音声合成';
     const MERGE_STR_JA = 'ファイル結合';
+    const DELETE_STR_JA = 'クリア';
     const STATUS_STR_JA = 'ステータス';
     const CONFIG_STR_JA = '設定';
     const EXIT_STR_JA = '終了';
@@ -66,6 +62,7 @@
     const APPNAME_STR_EN = 'Aozora Recorder';
     const RECORD_STR_EN = 'Record';
     const MERGE_STR_EN = 'Merge';
+    const DELETE_STR_EN = 'Delete';
     const STATUS_STR_EN = 'Status';
     const CONFIG_STR_EN = 'Config';
     const EXIT_STR_EN = 'Exit';
@@ -75,6 +72,8 @@
     const recordButtonDom = document.getElementById('record_button');
     const mergeDom = document.getElementById('merge');
     const mergeButtonDom = document.getElementById('merge_button');
+    const deleteDom = document.getElementById('delete');
+    const deleteButtonDom = document.getElementById('delete_button');
     const statusDom = document.getElementById('status');
     const errorDom = document.getElementById('error');
     const statusHeadDom = document.getElementById('statushead');
@@ -127,17 +126,10 @@
     const gotoRecord = () => {
       try {
         console.log('recording');
-        // voice index
-        const selectedVoiceIdx = selectVoiceDom.selectedIndex;
         // voice selected
         const tmpVoiceModel = selectVoiceDom.value;
-        // send obj
-        const sendObj = {
-          idx: selectedVoiceIdx,
-          model: tmpVoiceModel,
-        }
         // record
-        window.api.send('record', sendObj);
+        window.api.send('record', tmpVoiceModel);
 
       } catch (e) {
         // error
@@ -151,6 +143,19 @@
         console.log('merging');
         // merge
         window.api.send('merge');
+
+      } catch (e) {
+        // error
+        console.log(e);
+      }
+    }
+
+    // start deleting
+    const gotoDelete = () => {
+      try {
+        console.log('deleting');
+        // delete
+        window.api.send('delete');
 
       } catch (e) {
         // error
@@ -194,6 +199,8 @@
         recordButtonDom.innerHTML = RECORD_STR_JA;
         mergeDom.innerHTML = MERGE_STR_JA;
         mergeButtonDom.innerHTML = MERGE_STR_JA;
+        deleteDom.innerHTML = DELETE_STR_JA;
+        deleteButtonDom.innerHTML = DELETE_STR_JA;
         statusHeadDom.innerHTML = STATUS_STR_JA;
         configDom.innerHTML = CONFIG_STR_JA;
         configButtonDom.innerHTML = CONFIG_STR_JA;
@@ -207,6 +214,8 @@
         recordButtonDom.innerHTML = RECORD_STR_EN;
         mergeDom.innerHTML = MERGE_STR_EN;
         mergeButtonDom.innerHTML = MERGE_STR_EN;
+        deleteDom.innerHTML = DELETE_STR_EN;
+        deleteButtonDom.innerHTML = DELETE_STR_EN;
         statusHeadDom.innerHTML = STATUS_STR_EN;
         configDom.innerHTML = CONFIG_STR_EN;
         configButtonDom.innerHTML = CONFIG_STR_EN;

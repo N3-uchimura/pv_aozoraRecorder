@@ -55,6 +55,10 @@ footer {
   margin-right: 10px;
 }
 
+#delete {
+  margin-top: 50px;
+}
+
 .arrow {
   border: solid black;
   border-width: 0 3px 3px 0;
