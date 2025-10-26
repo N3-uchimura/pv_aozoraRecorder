@@ -10,7 +10,7 @@
 
 // define modules
 import * as path from 'node:path'; // path
-import { promises, existsSync } from 'fs'; // file system
+import { promises, existsSync } from 'node:fs'; // file system
 import { unlink, rmdir, readdir } from 'node:fs/promises'; // file 
 // file system definition
 const { mkdir } = promises;
@@ -91,18 +91,40 @@ class FileManage {
     return new Promise(async (resolve1, _) => {
       try {
         FileManage.logger.debug('filemanage: rmDir started.');
+        // dir not exists
+        if (!existsSync(dir)) {
+          FileManage.logger.debug('filemanage: dir not exists.');
+          resolve1();
+        }
         // directory list
         const tmpDirs: string[] = await readdir(dir);
+        // empty
+        if (tmpDirs.length == 0) {
+          FileManage.logger.debug('filemanage: dir is empty.');
+          resolve1();
+        }
         // delete all files
         await Promise.all(tmpDirs.map((dr: string): Promise<void> => {
           return new Promise(async (resolve2, _) => {
             try {
               // txt file path
               const tmpTxtFiles: string[] = await readdir(path.join(dir, dr));
+              console.log(tmpTxtFiles);
+              // dir not exists
+              if (!existsSync(dir)) {
+                FileManage.logger.silly('filemanage: dir not exists.');
+                resolve2();
+              }
               // delete all files
               await Promise.all(tmpTxtFiles.map((file: string): Promise<void> => {
                 return new Promise(async (resolve3, _) => {
                   try {
+                    // target
+                    const targetFile: string = path.join(dir, dr, file);
+                    // dir not exists
+                    if (!existsSync(targetFile)) {
+                      resolve3();
+                    }
                     // delete file
                     await unlink(path.join(dir, dr, file));
                     // result
@@ -121,6 +143,7 @@ class FileManage {
               FileManage.logger.error(err);
               resolve2();
             }
+            FileManage.logger.debug('filemanage: rmDir end.');
             // result
             resolve1();
           });

@@ -12,7 +12,7 @@ import { myConst, myNums } from './consts/globalvariables';
 
 /// Modules
 import * as path from 'node:path'; // path
-import { rmSync, createWriteStream, existsSync } from 'node:fs'; // file system
+import { createWriteStream, existsSync } from 'node:fs'; // file system
 import { readFile, writeFile, readdir, cp } from 'node:fs/promises'; // file system (Promise)
 import { BrowserWindow, app, ipcMain, Tray, Menu, nativeImage } from 'electron'; // electron
 import axios from 'axios'; // fot http communication
@@ -562,7 +562,7 @@ ipcMain.on('delete', async (event: any, _) => {
     // language
     const language = cacheMaker.get('language') ?? 'japanese';
     // remove all files
-    await fileManager.rmDir(path.join(fileRootPath, 'partial'));
+    //await fileManager.rmDir(path.join(fileRootPath, 'partial'));
     // status message
     let finishedMessage: string = '';
     // switch on language
