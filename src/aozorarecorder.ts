@@ -8,12 +8,13 @@
 
 /// Constants
 // namespace
-import { myConst, myNums } from './consts/globalvariables';
+import { myConst, myNums, mySynthesis } from './consts/globalvariables';
 
 /// Modules
 import * as path from 'node:path'; // path
 import { createWriteStream, existsSync } from 'node:fs'; // file system
 import { readFile, writeFile, readdir, cp } from 'node:fs/promises'; // file system (Promise)
+import { setTimeout } from 'timers/promises';
 import { BrowserWindow, app, ipcMain, Tray, Menu, nativeImage } from 'electron'; // electron
 import axios from 'axios'; // fot http communication
 import iconv from 'iconv-lite'; // Text converter
@@ -243,12 +244,8 @@ ipcMain.on("beforeready", async (event: any, _) => {
 ipcMain.on('record', async (event: any, arg: any) => {
   try {
     logger.info('ipc: record started.');
-    // status message
-    let statusmessage: string;
-    // unit
-    let tmpUnit: string;
     // language
-    const language = cacheMaker.get('language') ?? 'japanese';
+    const language: string = cacheMaker.get('language') ?? 'japanese';
     // connection test
     const testResult: string = await testRequest();
     // test result
@@ -273,22 +270,15 @@ ipcMain.on('record', async (event: any, arg: any) => {
         throw new Error('file/source directory is empty');
       }
     }
-    // complete
-    logger.debug('ipc: delete file/partial files completed.');
-
     // file list
     const files: string[] = await readdir(path.join(fileRootPath, 'source'));
     // loop
-    await Promise.all(files.map(async (fl: string): Promise<void> => {
+    await Promise.allSettled(files.map(async (fl: string): Promise<void> => {
       return new Promise(async (resolve1, reject1) => {
         try {
           logger.silly(`record: operating ${fl}`);
-          // filename list
-          let tmpFileNameArray: string[] = [];
           // filename
-          const fileName: string = path.parse(fl).name;
-          // ID
-          const fileId: string = fileName.slice(0, 5);
+          const fileId: string = path.parse(fl).name.slice(0, 5);
           // save path
           const outDirPath: string = path.join(fileRootPath, 'partial', fileId);
           // make dir
@@ -303,95 +293,26 @@ ipcMain.on('record', async (event: any, arg: any) => {
           // decode
           const str: string = iconv.decode(txtdata, 'UTF8');
           logger.silly('record: char decoding finished.');
-          // split on \r\n
-          const strArray: string[] = str.split(/\r\n/);
-          // switch on language
-          if (language == 'japanese') {
-            // set finish message
-            statusmessage = '音声作成中...';
-            tmpUnit = '件';
-          } else {
-            // set finish message
-            statusmessage = 'Making wavs...';
-            tmpUnit = 'items';
+          // over 10000
+          if (str.length > 10000) {
+            // japanese
+            if (language == 'japanese') {
+              throw new Error('1万文字を超えています');
+            } else {
+              throw new Error('over 10,000 words.');
+            }
           }
-          // URL
-          event.sender.send('statusUpdate', {
-            status: statusmessage,
-            target: `${strArray.length}${tmpUnit}`
-          });
-
-          // loop
-          await Promise.all(strArray.map(async (st: string, index: number): Promise<void> => {
-            return new Promise(async (resolve2, reject2) => {
-              try {
-                // tmpfile
-                let tmpFileName: string = '';
-
-                // no text error
-                if (st.trim().length > 0) {
-                  logger.silly(`record: synthesizing .. ${st}`);
-                  // index
-                  const paddedIndex1: string = index.toString().padStart(4, '0');
-
-                  // over 500 char
-                  if (st.length > 500) {
-                    // split on 。
-                    const subStrArray: string[] = st.split(/。/);
-                    // make audio
-                    await Promise.all(subStrArray.map(async (sb: string, idx: number): Promise<void> => {
-                      return new Promise(async (resolve3, reject3) => {
-                        try {
-                          // index
-                          const paddedIndex2: string = idx.toString().padStart(4, '0');
-                          logger.silly("record1: " + paddedIndex1);
-                          logger.silly("record2: " + paddedIndex2);
-                          // filename
-                          tmpFileName = `${fileId}-${paddedIndex1}-${paddedIndex2}.wav`;
-                          // synthesis request
-                          await synthesisRequest(tmpFileName, sb, arg, outDirPath);
-                          // add to filelist
-                          tmpFileNameArray.push(tmpFileName);
-                          // complete
-                          resolve3();
-
-                        } catch (err1: unknown) {
-                          // error
-                          logger.error(err1);
-                          resolve3();
-                        }
-                      })
-                    }));
-
-                  } else {
-                    // filename
-                    tmpFileName = `${fileId}-${paddedIndex1}.wav`;
-                    // synthesis request
-                    await synthesisRequest(tmpFileName, st, arg, outDirPath);
-                    // add to list
-                    tmpFileNameArray.push(tmpFileName);
-                  }
-                  logger.debug(`record: ${tmpFileName} finished.`);
-                  // complete
-                  resolve2();
-                } else {
-                  logger.debug('record: no length.');
-                  resolve2();
-                }
-
-              } catch (err2: unknown) {
-                // error
-                logger.error(err2);
-                reject2();
-              }
-            });
-          }));
+          // filename
+          const tmpFileName = `${path.parse(fl).name}.wav`;
+          // synthesis request
+          await synthesisRequest(tmpFileName, str, arg, outDirPath);
           // complete
           resolve1();
 
         } catch (err3: unknown) {
           // error
           logger.error(err3);
+          // reject
           reject1();
         }
       });
@@ -687,34 +608,15 @@ ipcMain.on('exit', async () => {
  Functions
 */
 // synthesis audio
-const synthesisRequest = async (filename: string, text: string, index: number, outDir: string): Promise<string> => {
+const synthesisRequest = async (filename: string, text: string, index: number, outDir: string): Promise<void> => {
   return new Promise(async (resolve, reject) => {
     try {
-      logger.debug(`${filename} started.`);
       // pipe
       const finished = promisify(stream.finished);
-      // parameter
-      const params: any = {
-        text: text,
-        encoding: 'utf-8',
-        model_id: index,
-        //speaker_name: model,
-        sdp_ratio: 0.2,
-        noise: 0.6,
-        noisew: 0.8,
-        length: 1.1,
-        language: 'JP',
-        auto_split: true,
-        split_interval: 2,
-        assist_text_weight: 1.0,
-        style: 'Neutral',
-        style_weight: 5.0,
-        // reference_audio_path: '',
-      }
       // query
-      const query: any = new URLSearchParams(params);
+      const query: any = new URLSearchParams(mySynthesis.params(text, index));
       // requestURL
-      const tmpUrl: string = `http://${myConst.HOSTNAME}:${myNums.PORT}/voice?${query}`;
+      const requestUrl: string = `http://${myConst.HOSTNAME}:${myNums.PORT}/voice?${query}`;
       // file path
       const filePath: string = path.join(outDir, filename);
       // file writer
@@ -722,15 +624,18 @@ const synthesisRequest = async (filename: string, text: string, index: number, o
       // GET request
       await axios({
         method: 'get',
-        url: tmpUrl,
-        responseType: 'stream',
+        url: requestUrl,
+        responseType: 'stream'
 
       }).then(async (response: any) => {
+        // pipe
         await response.data.pipe(writer);
+        // finish recording
         await finished(writer);
-        logger.debug('synthesisRequest end');
-        resolve(filePath); //this is a Promise
-      }).catch((err: any) => {
+        // resolve
+        resolve();
+      }).catch((err: unknown) => {
+        // error
         logger.error(err);
         reject();
       });
@@ -738,7 +643,7 @@ const synthesisRequest = async (filename: string, text: string, index: number, o
     } catch (e: unknown) {
       // error
       logger.error(e);
-      reject('error');
+      reject();
     }
   });
 }

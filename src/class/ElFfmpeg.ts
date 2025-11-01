@@ -85,7 +85,7 @@ class ElFfmpeg {
       } catch (e: any) {
         // error
         ElFfmpeg.logger.error(e);
-        reject();
+        resolve();
       }
     });
   }
@@ -122,7 +122,7 @@ class ElFfmpeg {
       } catch (e: any) {
         // error
         ElFfmpeg.logger.error(e);
-        reject();
+        resolve();
       }
     });
   }
