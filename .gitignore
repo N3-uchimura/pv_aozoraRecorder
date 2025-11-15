@@ -1,0 +1,8 @@
+/node_modules/
+/build/
+/output/
+package-lock.json
+/release-builds/
+/.vscode/
+/file/
+/dist/

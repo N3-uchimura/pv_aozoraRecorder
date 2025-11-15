@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Aozora Recorder Config</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline';">
+  <link rel="stylesheet" href="css/index.css">
+  <link rel="stylesheet" href="css/button.css">
+</head>
+
+<body>
+  <h1 id="maintitle">Aozora Recorder Config</h1>
+  <h4>
+    <div class="operation_area">
+      <input type="checkbox" id="language" checked><span id="languagearea">Japanese</span>
+    </div>
+  </h4>
+  <div class="operation_area">
+    <button id="save_button" class="button-g button-6 button-wide" value="top" onclick="save();">Save</button>
+  </div>
+  <div class="operation_area">
+    <button id="top_button" class="button-g button-1 button-wide" value="top" onclick="topPage();">Goto Top</button>
+  </div>
+  <div class="operation_area">
+    <button id="exit_button" class="button-g button-6 button-wide" value="exit" onclick="exitApp();">Exit</button>
+  </div>
+  <footer>
+    <p><small>&copy; 2025 Nthree LLC. All Rights Reserved. </small></p>
+  </footer>
+
+  <script charset="UTF-8">
+    /// constants
+    // japanese
+    const APPNAME_STR_JA = '青空レコーダ設定画面';
+    const LANGUAGE_STR_JA = '日本語';
+    const GOTOTOP_STR_JA = 'トップに戻る';
+    const SAVE_STR_JA = '保存';
+    const EXIT_STR_JA = '終了';
+    // english
+    const APPNAME_STR_EN = 'Aozora Recorder Config';
+    const LANGUAGE_STR_EN = 'Japanese';
+    const GOTOTOP_STR_EN = 'Goto Top';
+    const SAVE_STR_EN = 'Save';
+    const EXIT_STR_EN = 'Exit';
+    // doms
+    const maintitleDom = document.getElementById("maintitle");
+    const languageDom = document.getElementById("language");
+    const languageareaDom = document.getElementById("languagearea");
+    const gotoTopButtonDom = document.getElementById("top_button");
+    const saveButtonDom = document.getElementById('save_button');
+    const exitButtonDom = document.getElementById('exit_button');
+
+    /// ipc
+    // watch checkbox
+    languageDom.addEventListener('change', e => {
+      // language detection
+      const fixLang = languageDom.checked ? 'japanese' : 'english';
+      // change language
+      changeLanguage(fixLang);
+    });
+
+    // be ready
+    window.api.on("confready", arg => {
+      // change language
+      changeLanguage(arg);
+    });
+
+    // save
+    const save = async () => {
+      try {
+        console.log('save mode');
+        // language detection
+        const fixLang = languageDom.checked ? 'japanese' : 'english';
+        // change language
+        changeLanguage(fixLang);
+        // obj
+        const sendObj = {
+          language: fixLang,
+        }
+        // send to main ipc
+        window.api.send('save', sendObj);
+
+      } catch (e) {
+        // error
+        window.api.send('error', e);
+      }
+    }
+
+    // goto top
+    const topPage = () => {
+      try {
+        console.log("topPage mode");
+        // send to main ipc
+        window.api.send("top");
+
+      } catch (e) {
+        // error
+        window.api.send("error", e);
+      }
+    }
+
+    // exit
+    const exitApp = () => {
+      try {
+        console.log('exit');
+        // exit app
+        window.api.send('exit');
+
+      } catch (e) {
+        // error
+        console.log(e);
+      }
+    }
+
+    // change language
+    const changeLanguage = lang => {
+      // japanese
+      if (lang == 'japanese') {
+        languageDom.checked = true;
+        document.title = APPNAME_STR_JA;
+        maintitleDom.innerHTML = APPNAME_STR_JA;
+        languageareaDom.innerHTML = LANGUAGE_STR_JA;
+        gotoTopButtonDom.innerHTML = GOTOTOP_STR_JA;
+        saveButtonDom.innerHTML = SAVE_STR_JA;
+        exitButtonDom.innerHTML = EXIT_STR_JA;
+        document.documentElement.setAttribute("lang", 'ja');
+        // english
+      } else {
+        languageDom.checked = false;
+        document.title = APPNAME_STR_EN;
+        maintitleDom.innerHTML = APPNAME_STR_EN
+        languageareaDom.innerHTML = LANGUAGE_STR_EN;
+        gotoTopButtonDom.innerHTML = GOTOTOP_STR_EN;
+        saveButtonDom.innerHTML = SAVE_STR_EN;
+        exitButtonDom.innerHTML = EXIT_STR_EN;
+        document.documentElement.setAttribute("lang", 'en');
+      }
+    }
+  </script>
+</body>
+
+</html>

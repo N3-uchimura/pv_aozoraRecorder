@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Aozora Recorder</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline';">
+  <link rel="stylesheet" href="css/index.css">
+  <link rel="stylesheet" href="css/button.css">
+</head>
+
+<body>
+  <h1 id="maintitle">Aozora Recorder</h1>
+  <div class="operation_area">
+    <h3 id="record">Record</h3>
+    <div id="select_box" class="cp_ipselect">
+      <select id="voicemodel" name="voicemodel">
+        <option value="1">bratology</option>
+        <option value="9">merged_aoyama_chiyu</option>
+      </select>
+    </div>
+    <button id="record_button" class="button-g button-wide" value="record" onclick="gotoRecord();">Record</button>
+  </div>
+  <p><i class="arrow down"></i></p>
+  <div class="operation_area">
+    <h3 id="merge">Merge</h3>
+    <button id="merge_button" class="button-g button-wide" value="merge" onclick="gotoMerge();">Merge</button>
+  </div>
+  <div class="operation_area">
+    <h3 id="delete">Delete</h3>
+    <button id="delete_button" class="button-g button-wide" value="delete" onclick="gotoDelete();">Delete</button>
+  </div>
+  <div class="config_area">
+    <h3 id="config">Config</h3>
+    <button id="config_button" class="button-g button-6 button-wide" value="config"
+      onclick="gotoConfig()">Config</button>
+  </div>
+  <div class="status_area">
+    <h3 id="statushead">Status</h3>
+    <div id="status"></div>
+    <div id="targetpage"></div>
+    <div id="error"></div>
+  </div>
+  <div class="exit_area">
+    <button id="exit_button" class="button-g button-1 button-wide" value="exit" onclick="exitApp();">Exit</button>
+  </div>
+  <footer>
+    <p><small>&copy; 2025 Nthree LLC. All Rights Reserved. </small></p>
+  </footer>
+
+  <script charset="UTF-8">
+    /// constants
+    // japanese
+    const APPNAME_STR_JA = '青空レコーダ';
+    const RECORD_STR_JA = '音声合成';
+    const MERGE_STR_JA = 'ファイル結合';
+    const DELETE_STR_JA = 'クリア';
+    const STATUS_STR_JA = 'ステータス';
+    const CONFIG_STR_JA = '設定';
+    const EXIT_STR_JA = '終了';
+    // english
+    const APPNAME_STR_EN = 'Aozora Recorder';
+    const RECORD_STR_EN = 'Record';
+    const MERGE_STR_EN = 'Merge';
+    const DELETE_STR_EN = 'Delete';
+    const STATUS_STR_EN = 'Status';
+    const CONFIG_STR_EN = 'Config';
+    const EXIT_STR_EN = 'Exit';
+    /// doms
+    const maintitleDom = document.getElementById("maintitle");
+    const recordDom = document.getElementById('record');
+    const recordButtonDom = document.getElementById('record_button');
+    const mergeDom = document.getElementById('merge');
+    const mergeButtonDom = document.getElementById('merge_button');
+    const deleteDom = document.getElementById('delete');
+    const deleteButtonDom = document.getElementById('delete_button');
+    const statusDom = document.getElementById('status');
+    const errorDom = document.getElementById('error');
+    const statusHeadDom = document.getElementById('statushead');
+    const pageDom = document.getElementById('targetpage');
+    const configDom = document.getElementById('config');
+    const configButtonDom = document.getElementById('config_button');
+    const exitButtonDom = document.getElementById('exit_button');
+    const selectVoiceDom = document.getElementById("voicemodel");
+
+    /// ipc
+    // before ready
+    window.api.send("beforeready");
+
+    // be ready
+    window.api.on("ready", arg => {
+      console.log('ready');
+      // change language
+      changeLanguage(arg);
+    });
+
+    // update status
+    window.api.on('statusUpdate', arg => {
+      try {
+        console.log(arg);
+        // status 
+        statusDom.innerHTML = arg.status;
+        // target
+        pageDom.innerHTML = arg.target;
+
+      } catch (e) {
+        // error
+        console.log(e);
+      }
+    });
+
+    // update error
+    window.api.on('errorUpdate', arg => {
+      try {
+        console.log(arg);
+        // error 
+        errorDom.innerHTML = arg;
+
+      } catch (e) {
+        // error
+        console.log(e);
+      }
+    });
+
+    // start recording
+    const gotoRecord = () => {
+      try {
+        console.log('recording');
+        // voice selected
+        const tmpVoiceModel = selectVoiceDom.value;
+        // record
+        window.api.send('record', tmpVoiceModel);
+
+      } catch (e) {
+        // error
+        console.log(e);
+      }
+    }
+
+    // start merging
+    const gotoMerge = () => {
+      try {
+        console.log('merging');
+        // merge
+        window.api.send('merge');
+
+      } catch (e) {
+        // error
+        console.log(e);
+      }
+    }
+
+    // start deleting
+    const gotoDelete = () => {
+      try {
+        console.log('deleting');
+        // delete
+        window.api.send('delete');
+
+      } catch (e) {
+        // error
+        console.log(e);
+      }
+    }
+
+    // goto config page
+    const gotoConfig = () => {
+      try {
+        console.log('goto config');
+        // config
+        window.api.send('config');
+
+      } catch (e) {
+        // error
+        console.log(e);
+      }
+    }
+
+    // exit
+    const exitApp = () => {
+      try {
+        console.log('exit');
+        // exit app
+        window.api.send('exit');
+
+      } catch (e) {
+        // error
+        console.log(e);
+      }
+    }
+
+    // change language
+    const changeLanguage = lang => {
+      // japanese
+      if (lang == 'japanese') {
+        document.title = APPNAME_STR_JA;
+        maintitleDom.innerHTML = APPNAME_STR_JA;
+        recordDom.innerHTML = RECORD_STR_JA;
+        recordButtonDom.innerHTML = RECORD_STR_JA;
+        mergeDom.innerHTML = MERGE_STR_JA;
+        mergeButtonDom.innerHTML = MERGE_STR_JA;
+        deleteDom.innerHTML = DELETE_STR_JA;
+        deleteButtonDom.innerHTML = DELETE_STR_JA;
+        statusHeadDom.innerHTML = STATUS_STR_JA;
+        configDom.innerHTML = CONFIG_STR_JA;
+        configButtonDom.innerHTML = CONFIG_STR_JA;
+        exitButtonDom.innerHTML = EXIT_STR_JA;
+        document.documentElement.setAttribute("lang", 'ja');
+        // english
+      } else {
+        document.title = APPNAME_STR_EN;
+        maintitleDom.innerHTML = APPNAME_STR_EN;
+        recordDom.innerHTML = RECORD_STR_EN;
+        recordButtonDom.innerHTML = RECORD_STR_EN;
+        mergeDom.innerHTML = MERGE_STR_EN;
+        mergeButtonDom.innerHTML = MERGE_STR_EN;
+        deleteDom.innerHTML = DELETE_STR_EN;
+        deleteButtonDom.innerHTML = DELETE_STR_EN;
+        statusHeadDom.innerHTML = STATUS_STR_EN;
+        configDom.innerHTML = CONFIG_STR_EN;
+        configButtonDom.innerHTML = CONFIG_STR_EN;
+        exitButtonDom.innerHTML = EXIT_STR_EN;
+        document.documentElement.setAttribute("lang", 'en');
+      }
+    }
+  </script>
+</body>
+
+</html>
