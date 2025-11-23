@@ -1,7 +1,7 @@
 {
   "name": "aozora-recorder",
   "productName": "aozora-recorder personal",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "private": true,
   "description": "personal application for recording aozora books.",
   "main": "build/aozorarecorder.js",

@@ -233,10 +233,21 @@ app.on('window-all-closed', () => {
 // ready
 ipcMain.on("beforeready", async (event: any, _) => {
   logger.info("app: beforeready app");
+  // models
+  let models: any = [];
+  // get all models
+  const modelsArray: any = await getModelsRequest();
+  // set models
+  modelsArray.forEach((model: any) => {
+    models.push(model[1].model_path.split('\\')[1]);
+  })
   // language
   const language = cacheMaker.get('language') ?? '';
   // be ready
-  event.sender.send("ready", language);
+  event.sender.send("ready", {
+    language: language,
+    models: models,
+  });
 });
 
 // record
@@ -416,22 +427,14 @@ ipcMain.on('merge', async (event: any, _) => {
             for await (const [index, arr] of Object.entries(chunkedArr)) {
               // partial output path
               const partialOutPath: string = path.join(outputDir, `${dir}-${index}.wav`);
-              // partial output path
-              const partialFinalPath: string = path.join(outputDir, `${dir}-${index}.m4a`);
               // merge wavs
               await ffmpegManager.mergeAudio(arr, partialOutPath, 10000, 1024 * 1024 * 1024 * 5);
-              // convert to m4a
-              await ffmpegManager.convertAudioToM4a(partialOutPath, partialFinalPath, 10000, 100000);
             }
           } else {
             // output path
             const outputPath: string = path.join(outputDir, `${dir}.wav`);
-            // partial output path
-            const finalPath: string = path.join(outputDir, `${dir}.m4a`);
             // merge wavs
             await ffmpegManager.mergeAudio(filePaths, outputPath, 10000, 1024 * 1024 * 1024 * 5);
-            // convert to m4a
-            await ffmpegManager.convertAudioToM4a(outputPath, finalPath, 10000, 100000);
           }
           resolve1();
 
@@ -647,6 +650,42 @@ const synthesisRequest = async (filename: string, text: string, index: number, o
       // error
       logger.error(e);
       reject();
+    }
+  });
+}
+
+// get models
+const getModelsRequest = async (): Promise<any> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      logger.debug('get models started.');
+      // requestURL
+      const tmpUrl: string = `http://${myConst.HOSTNAME}:${myNums.PORT}/models/info`;
+      // GET request
+      await axios({
+        method: 'get',
+        url: tmpUrl,
+
+      }).then(async (data: any) => {
+        // get model data
+        const pairs: [string, any][] = Object.entries(data.data);
+        // return them
+        resolve(pairs);
+
+      }).catch((err: any) => {
+        if (err instanceof Error) {
+          // error
+          throw new Error(err.message);
+        }
+      });
+
+    } catch (e: unknown) {
+      // error
+      if (e instanceof Error) {
+        // error
+        logger.error(e);
+        reject('ng');
+      }
     }
   });
 }
