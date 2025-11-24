@@ -267,6 +267,7 @@ ipcMain.on('record', async (event: any, arg: any) => {
         throw new Error('communication error');
       }
     }
+    logger.debug('ipc: test is ok.');
     // subdir list
     const allDirents: any = await readdir(path.join(fileRootPath, 'source'), { withFileTypes: true });
     // remove all files
@@ -612,13 +613,13 @@ ipcMain.on('exit', async () => {
  Functions
 */
 // synthesis audio
-const synthesisRequest = async (filename: string, text: string, index: number, outDir: string): Promise<void> => {
+const synthesisRequest = async (filename: string, text: string, modelname: string, outDir: string): Promise<void> => {
   return new Promise(async (resolve, reject) => {
     try {
       // pipe
       const finished = promisify(stream.finished);
       // query
-      const query: any = new URLSearchParams(mySynthesis.params(text, index));
+      const query: any = new URLSearchParams(mySynthesis.params(text, modelname));
       // requestURL
       const requestUrl: string = `http://${myConst.HOSTNAME}:${myNums.PORT}/voice?${query}`;
       // file path
