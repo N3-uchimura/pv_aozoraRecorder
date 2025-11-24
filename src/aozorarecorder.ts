@@ -289,7 +289,7 @@ ipcMain.on('record', async (event: any, arg: any) => {
         try {
           logger.silly(`record: operating ${fl}`);
           // filename
-          const fileId: string = path.parse(fl).name.slice(0, 5);
+          const fileId: string = path.parse(fl).name;
           // save path
           const outDirPath: string = path.join(fileRootPath, 'partial', fileId);
           // make dir
