@@ -12,6 +12,10 @@
 <body>
   <h1 id="maintitle">Aozora Recorder</h1>
   <div class="operation_area">
+    <button id="open_button" class="button-g button-6 button-wide" value="open"
+      onclick="gotoOpen()">OpenDir</button>
+  </div>
+  <div class="operation_area">
     <h3 id="record">Record</h3>
     <div id="select_box" class="cp_ipselect">
       <select id="voicemodel" name="voicemodel">
@@ -41,12 +45,14 @@
     /// constants
     // japanese
     const APPNAME_STR_JA = '青空レコーダ';
+    const OPENDIR_STR_JA = 'フォルダ開く';
     const RECORD_STR_JA = '音声合成';
     const STATUS_STR_JA = 'ステータス';
     const CONFIG_STR_JA = '設定';
     const EXIT_STR_JA = '終了';
     // english
     const APPNAME_STR_EN = 'Aozora Recorder';
+    const OPENDIR_STR_EN = 'OpenDir';
     const RECORD_STR_EN = 'Record';
     const STATUS_STR_EN = 'Status';
     const CONFIG_STR_EN = 'Config';
@@ -59,6 +65,7 @@
     const errorDom = document.getElementById('error');
     const statusHeadDom = document.getElementById('statushead');
     const pageDom = document.getElementById('targetpage');
+    const opendirButtonDom = document.getElementById('open_button');
     const configDom = document.getElementById('config');
     const configButtonDom = document.getElementById('config_button');
     const exitButtonDom = document.getElementById('exit_button');
@@ -125,6 +132,18 @@
       }
     }
 
+    // goto open dir
+    const gotoOpen = () => {
+      try {
+        // scrape
+        window.api.send('open');
+
+      } catch (e) {
+        // error
+        console.log(e);
+      }
+    }
+
     // goto config page
     const gotoConfig = () => {
       try {
@@ -160,6 +179,7 @@
         recordDom.innerHTML = RECORD_STR_JA;
         recordButtonDom.innerHTML = RECORD_STR_JA;
         statusHeadDom.innerHTML = STATUS_STR_JA;
+        opendirButtonDom.innerHTML = OPENDIR_STR_JA;
         configDom.innerHTML = CONFIG_STR_JA;
         configButtonDom.innerHTML = CONFIG_STR_JA;
         exitButtonDom.innerHTML = EXIT_STR_JA;
@@ -171,6 +191,7 @@
         recordDom.innerHTML = RECORD_STR_EN;
         recordButtonDom.innerHTML = RECORD_STR_EN;
         statusHeadDom.innerHTML = STATUS_STR_EN;
+        opendirButtonDom.innerHTML = OPENDIR_STR_EN;
         configDom.innerHTML = CONFIG_STR_EN;
         configButtonDom.innerHTML = CONFIG_STR_EN;
         exitButtonDom.innerHTML = EXIT_STR_EN;

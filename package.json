@@ -1,7 +1,7 @@
 {
   "name": "aozora-recorder",
   "productName": "aozora-recorder personal",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "description": "personal application for recording aozora books.",
   "main": "build/aozorarecorder.js",
@@ -21,12 +21,13 @@
     "iconv-lite": "^0.6.3",
     "node-cache": "^5.1.2",
     "stream": "^0.0.3",
+    "typescript": "^5.9.3",
     "util": "^0.12.5"
   },
   "devDependencies": {
     "@types/node": "^20.19.9",
     "electron": "^38.5.0",
-    "electron-builder": "^26.0.12"
+    "electron-builder": "^26.7.0"
   },
   "build": {
     "appId": "net.numthree.aozorarecorder",

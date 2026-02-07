@@ -13,7 +13,8 @@ import { myConst, myNums, mySynthesis } from './consts/globalvariables';
 /// Modules
 import * as path from 'node:path'; // path
 import { createWriteStream, existsSync } from 'node:fs'; // file system
-import { readFile, writeFile, readdir } from 'node:fs/promises'; // file system (Promise)
+import { readFile, writeFile, readdir } from 'node:fs/promises'; // promise fs
+import { exec } from 'child_process'; // child process
 import { BrowserWindow, app, ipcMain, Tray, Menu, nativeImage } from 'electron'; // electron
 import axios from 'axios'; // http communication
 import iconv from 'iconv-lite'; // Text converter
@@ -89,16 +90,6 @@ const createWindow = (): void => {
       if (!app.isPackaged) {
         //mainWindow.webContents.openDevTools();
       }
-    });
-
-    // stay at tray
-    mainWindow.on('will-resize', (event: any): void => {
-      // avoid Wclick
-      event.preventDefault();
-      // hide window
-      mainWindow.hide();
-      // returnfalse
-      event.returnValue = false;
     });
 
     // close window
@@ -245,6 +236,27 @@ ipcMain.on("beforeready", async (event: any, _) => {
     language: language,
     models: models,
   });
+});
+
+// open
+ipcMain.on('open', async (_: any, __: any): Promise<void> => {
+  try {
+    logger.info('app: open dir');
+    // switch on OS
+    const command = process.platform === 'win32' ? `explorer "${fileRootPath}"` :
+      process.platform === 'darwin' ? `open "${fileRootPath}"` :
+        `xdg-open "${fileRootPath}"`;
+    // open root dir
+    exec(command);
+
+  } catch (e: unknown) {
+    logger.error(e);
+    // error
+    if (e instanceof Error) {
+      // error message
+      dialogMaker.showmessage('error', e.message);
+    }
+  }
 });
 
 // record
@@ -404,7 +416,7 @@ ipcMain.on('save', async (event: any, arg: any) => {
   }
 });
 
-ipcMain.on('top', async (event: any, _) => {
+ipcMain.on('top', async (event: any, _: any) => {
   try {
     logger.info('app: top');
     // goto config page
