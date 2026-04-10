@@ -158,7 +158,7 @@ app.on('ready', async () => {
     // make file dir
     await fileManager.mkDirAll([path.join(fileRootPath, 'source'), path.join(fileRootPath, 'output'), path.join(fileRootPath, 'backup'), path.join(fileRootPath, 'partial')]);
     // icons
-    const icon: Electron.NativeImage = nativeImage.createFromPath(path.join(globalRootPath, 'assets', 'aozora.ico'));
+    const icon: Electron.NativeImage = nativeImage.createFromPath(path.join(globalRootPath, 'assets', 'aozorarecord.ico'));
     // tray
     const mainTray: Electron.Tray = new Tray(icon);
     // context menu

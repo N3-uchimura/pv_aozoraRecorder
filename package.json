@@ -24,9 +24,6 @@
     "typescript": "^5.9.3",
     "util": "^0.12.5"
   },
-  "overrides": {
-    "minimatch": "10.2.2"
-  },
   "devDependencies": {
     "@types/node": "^20.19.9",
     "electron": "^38.5.0",
@@ -54,7 +51,7 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "assets/aozora.png"
+      "icon": "assets/aozorarecord.png"
     },
     "nsis": {
       "oneClick": false,
